@@ -1,0 +1,51 @@
+/**
+ * Main CSS file with Tailwind CSS directives.
+ */
+
+/* Tailwind base styles */
+@tailwind base;
+
+/* Tailwind component classes */
+@tailwind components;
+
+/* Tailwind utility classes */
+@tailwind utilities;
+
+/* Custom styles */
+:root {
+  font-family: Inter, system-ui, Avenir, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.logo-spin {
+  animation: spin 20s linear infinite;
+  transform-origin: center;
+}
+
+.logo-spin:hover {
+  animation: spin 3s linear infinite;
+}
+
+/* Add these custom toggle styles */
+.toggle-custom:checked {
+  background-color: white;
+}
+
+.toggle-custom:checked:after {
+  background-color: black;
+}
