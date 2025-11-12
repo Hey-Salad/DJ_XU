@@ -17,6 +17,15 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_PROJECT_ID: string;
   /** Google Cloud Location */
   readonly VITE_GOOGLE_LOCATION: string;
+  /** Cloudflare Worker endpoint for DeepSeek proxy */
+  readonly VITE_AI_PROXY_URL?: string;
+  /** Supabase anonymous URL */
+  readonly VITE_SUPABASE_URL?: string;
+  /** Supabase anonymous key */
+  readonly VITE_SUPABASE_ANON_KEY?: string;
+  /** Optional compatibility with Next.js style envs */
+  readonly NEXT_PUBLIC_SUPABASE_URL?: string;
+  readonly NEXT_PUBLIC_SUPABASE_ANON_KEY?: string;
 }
 
 interface ImportMeta {

@@ -1,21 +1,57 @@
-# DJ XU – Cloudflare + DeepSeek Stack
+# DJ XU – AI DJ with Live Broadcasting
 
 DJ XU is an AI-assisted DJ experience that blends Spotify playback, ElevenLabs
-voice, and a bilingual UI. This repository now adds a Cloudflare Worker that
-proxies DeepSeek so the browser never touches the raw LLM API key while keeping
-latency low at the edge.
+voice, bilingual UI, and **live broadcasting with real-time captions**. This repository
+includes a Cloudflare Worker that proxies DeepSeek and manages broadcast sessions,
+keeping everything secure and low-latency at the edge.
+
+## ✨ NEW: Live Broadcasting Feature
+
+DJ XU now supports **live streaming** with:
+- 🎙️ Real-time AI-generated captions
+- 📱 Shareable links + QR codes
+- 👥 Live viewer count
+- 🎵 "Now Playing" track broadcasting
+- 🌍 Multi-language translation support
+- 📊 Viewer analytics & tracking
+
+**Perfect for:** Restaurants, clubs, content creators, live events
+
+See [BROADCAST_INTEGRATION.md](./BROADCAST_INTEGRATION.md) for full setup guide.
 
 ## Project Layout
 
 ```
-├── src/                    # React + Vite front-end
-│   ├── components/DjXu     # Core UI (player, voice controls, AI responses)
-│   ├── services/ai         # DeepSeek client used by hooks/components
-│   └── hooks/useVertexAI   # Hook that now targets DeepSeek via the proxy
-├── cloudflare-worker/      # Worker that signs DeepSeek requests
-│   ├── src/index.ts        # Worker logic + persona prompt
-│   └── wrangler.toml       # Deployment configuration
-└── scripts/                # Utility scripts (auth, tests, etc.)
+├── src/                        # React + Vite front-end
+│   ├── components/
+│   │   ├── DjXu/              # Core DJ UI (player, voice, AI)
+│   │   ├── Broadcast/         # 🆕 Broadcaster controls, error handling
+│   │   └── Viewer/            # 🆕 Live viewer interface
+│   ├── services/
+│   │   ├── ai/                # DeepSeek client
+│   │   ├── broadcast/         # 🆕 Broadcast API client
+│   │   └── captions/          # 🆕 ElevenLabs Scribe integration
+│   ├── hooks/
+│   │   ├── useVertexAI.ts     # AI hook using DeepSeek
+│   │   ├── useBroadcast.ts    # 🆕 Broadcaster state management
+│   │   └── useBroadcastAccess.ts # 🆕 Viewer access & heartbeat
+│   ├── pages/
+│   │   └── WatchBroadcast.tsx # 🆕 Viewer page (/watch/:token)
+│   └── types/
+│       └── broadcast.d.ts     # 🆕 TypeScript broadcast types
+├── cloudflare-worker/          # Cloudflare Worker (edge proxy)
+│   ├── src/index.ts           # DeepSeek + Broadcast API routes
+│   └── wrangler.toml          # Worker deployment config
+├── supabase/
+│   ├── migrations/            # Database schema
+│   │   ├── 20241109190000_create_music_schema.sql
+│   │   ├── 20241112160000_add_play_telemetry_rag.sql
+│   │   ├── 20241112170000_add_broadcast_system.sql      # 🆕
+│   │   └── 20241112180000_enable_broadcast_realtime.sql # 🆕
+│   └── seed/                  # Seed data
+└── scripts/
+    ├── test-broadcast-flow.sh # 🆕 E2E broadcast test
+    └── test-broadcast-flow.ts # 🆕 TypeScript test script
 ```
 
 ## Environment Variables
@@ -91,6 +127,13 @@ DEEPSEEK_API_BASE=https://api.deepseek.com
      npx wrangler secret put DEEPSEEK_API_BASE     # if you need a non-default URL
      npx wrangler secret put DEEPSEEK_MODEL        # optional override, e.g. `deepseek-chat`
      ```
+   - Set the ElevenLabs secrets so the worker can generate voice from DeepSeek output:
+     ```bash
+     npx wrangler secret put ELEVENLABS_API_KEY
+     npx wrangler secret put ELEVENLABS_VOICE_ID
+     npx wrangler secret put ELEVENLABS_MODEL      # optional, defaults to `eleven_v3`
+     npx wrangler secret put ELEVENLABS_API_BASE   # optional (useful for private endpoints)
+     ```
    - Leave `[workers.dev` or your custom domain route ready in `wrangler.toml`.
 
 2. **Deploy the Worker**
@@ -99,6 +142,7 @@ DEEPSEEK_API_BASE=https://api.deepseek.com
    npm run deploy
    ```
    - Configure a worker route like `https://djxu.yourdomain.com/api/deepseek`.
+   - Add an additional route for the new AI flow, e.g. `https://djxu.yourdomain.com/api/ai`, which returns both DeepSeek text and ElevenLabs base64 audio.
    - Make sure CORS is open for the SPA host by keeping the `/api/deepseek`
      path on the same origin as your Pages build.
 
@@ -114,8 +158,7 @@ DEEPSEEK_API_BASE=https://api.deepseek.com
      DeepSeek worker.
 
 4. **Verify**
-   - Visit the Pages preview URL, trigger a voice prompt or AI call, and confirm
-     the Worker logs show proxied DeepSeek responses.
+   - Hit `POST https://<your-pages-host>/api/ai` with `{ input: 'DJ warmup...' }` to ensure the worker returns the DeepSeek reply plus base64 ElevenLabs audio.
    - Use the Supabase SQL editor via the dashboard to confirm the schema exists,
      then re-run `node scripts/test-supabase-connection.js` to ensure the hosted
      DB responds as expected.
@@ -222,6 +265,15 @@ to Supabase whenever Spotify or the AI agent acts.
    ```
 4. Use the resulting snippets (`record_type`, `metadata`, `content`) as context
    when you call DeepSeek/Gemini via the Worker.
+
+### Direct Supabase sign-up/login
+
+If you’d prefer email/password accounts in addition to Spotify, visit `/auth`
+after starting the SPA. That route uses the Supabase browser client to sign users
+up or in, stores an optional `display_name` in the Auth metadata, and keeps the
+door open for connecting Spotify later. It’s a quick way to populate
+`public.app_users`/`public.user_profiles` before you add subscription, billing, or
+organizational rules.
 
 Once embeddings exist, the `rag_unified_index` view powers vector search purely
 inside Postgres so you do not need an external vector store.
