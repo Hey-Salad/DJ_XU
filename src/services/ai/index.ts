@@ -2,4 +2,4 @@
  * @fileoverview Exports for AI services.
  */
 
-export { VertexAIService } from './vertex';
+export { DeepSeekService } from './deepseek';
