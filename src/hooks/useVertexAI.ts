@@ -1,42 +1,27 @@
-/**
- * @fileoverview Custom hook for Vertex AI service interactions.
- */
+// src/hooks/useVertexAI.ts
+import { useState, useCallback, useMemo } from 'react';
+import { DeepSeekService } from '../services/ai';
+import type { AIRequest, AIResponse } from '../types/ai';
 
-import { useState, useCallback } from 'react';
-import { VertexAIService } from '../services/ai';
-import type { AIRequest } from '../types/ai';
+const DEFAULT_ENDPOINT = import.meta.env.VITE_AI_PROXY_URL || '/api/deepseek';
 
-/**
- * Configuration for Vertex AI service.
- */
-const VERTEX_CONFIG = {
-  projectId: import.meta.env.VITE_GOOGLE_PROJECT_ID,
-  location: 'us-central1',
-  model: 'gemini-pro'
-} as const;
-
-/**
- * Hook return type definition.
- */
 interface UseVertexAIReturn {
-  /** Function to process user input */
-  processInput: (request: AIRequest) => Promise<any>;
-  /** Whether the AI is currently processing a request */
+  processInput: (request: AIRequest) => Promise<AIResponse>;
   isProcessing: boolean;
-  /** Any error that occurred during processing */
   error: Error | null;
 }
 
-/**
- * Hook for interacting with Vertex AI service.
- * 
- * @returns {UseVertexAIReturn} Hook methods and state
- */
 export function useVertexAI(): UseVertexAIReturn {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const service = new VertexAIService(VERTEX_CONFIG);
+  const service = useMemo(
+    () =>
+      new DeepSeekService({
+        endpoint: DEFAULT_ENDPOINT,
+      }),
+    []
+  );
 
   const processInput = useCallback(async (request: AIRequest) => {
     setIsProcessing(true);
@@ -46,17 +31,18 @@ export function useVertexAI(): UseVertexAIReturn {
       const response = await service.processRequest(request);
       return response;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      throw error;
+      const normalizedError =
+        err instanceof Error ? err : new Error(String(err));
+      setError(normalizedError);
+      throw normalizedError;
     } finally {
       setIsProcessing(false);
     }
-  }, []);
+  }, [service]);
 
   return {
     processInput,
     isProcessing,
-    error
+    error,
   };
 }
