@@ -1,0 +1,18 @@
+# Local development secrets for wrangler dev
+# Copy to `.dev.vars` and fill in your values.
+
+# Supabase
+SUPABASE_URL=
+SUPABASE_SERVICE_KEY=
+WATCH_BASE_URL=http://localhost:5173
+
+# DeepSeek
+DEEPSEEK_API_KEY=
+DEEPSEEK_API_BASE=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+
+# ElevenLabs
+ELEVENLABS_API_KEY=
+ELEVENLABS_VOICE_ID=
+ELEVENLABS_MODEL=eleven_multilingual_v2
+ELEVENLABS_API_BASE=https://api.elevenlabs.io/v1

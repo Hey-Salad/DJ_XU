@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "lint-staged": "lint-staged",
     "preview": "vite preview",
-    "clean": "rimraf dist coverage node_modules/.cache"
+    "clean": "rimraf dist coverage node_modules/.cache",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@11labs/react": "^0.0.6",

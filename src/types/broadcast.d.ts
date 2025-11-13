@@ -44,3 +44,35 @@ export interface NowPlayingBroadcast {
   album_art_url: string;
   started_at: string;
 }
+
+export interface StartBroadcastRequest {
+  performanceSessionId: string;
+  maxViewers?: number;
+  captionLanguage?: string;
+  enableTranslations?: boolean;
+  /** Optional viewer base URL to construct share links (e.g. https://djxu.live). */
+  watchBaseUrl?: string;
+  /** Optional title/name for the broadcast to display to viewers. */
+  title?: string;
+}
+
+export interface StartBroadcastResponse {
+  broadcastId: string;
+  broadcastToken: string;
+  shareUrl: string;
+}
+
+export interface SendCaptionRequest {
+  broadcastToken: string;
+  text: string;
+  speaker?: 'DJ_XU' | 'USER' | 'SYSTEM';
+  audioUrl?: string;
+  detectedLanguage?: string;
+  confidence?: number;
+}
+
+export interface BroadcastInfo extends BroadcastSession {
+  viewer_count?: number;
+  started_at?: string;
+  ended_at?: string;
+}

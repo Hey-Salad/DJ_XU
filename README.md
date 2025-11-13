@@ -103,6 +103,20 @@ DEEPSEEK_API_BASE=https://api.deepseek.com
 
 ## Deployment
 
+## Security
+
+- Do not commit secrets. Local files like `.env` and `cloudflare-worker/.dev.vars` are ignored by Git and blocked by a pre-commit hook.
+- GitHub Actions runs a secret scan on every push/PR (`.github/workflows/secret-scan.yml`).
+- Pre-push hook runs a local gitleaks scan of new commits (`.husky/pre-push`). Install gitleaks: `brew install gitleaks` (macOS), `choco install gitleaks` (Windows), or see https://github.com/gitleaks/gitleaks.
+
+### If a secret leaks
+
+1. Rotate all affected keys immediately (Supabase, ElevenLabs, DeepSeek, etc.).
+2. Purge the file from history and force-push:
+   - `bash scripts/purge-secrets.sh cloudflare-worker/.dev.vars`
+   - Requires `git-filter-repo` (recommended) or `BFG`.
+3. Ask collaborators to force-pull and clear their clones.
+
 1. **Deploy the Worker**
    ```bash
    cd cloudflare-worker

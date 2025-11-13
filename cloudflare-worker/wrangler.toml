@@ -4,6 +4,7 @@ compatibility_date = "2024-11-01"
 
 [vars]
 DEEPSEEK_MODEL = "deepseek-chat"
+WATCH_BASE_URL = "https://djxu.live"
 
 # Uncomment and set for production if you host the front-end elsewhere
 # routes = [

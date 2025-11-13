@@ -119,7 +119,6 @@ export class BroadcastService {
   }
 
   getBroadcastUrl(token: string): string {
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/watch/${token}`;
+    return `https://djxu.live/stream/${token}`;
   }
 }

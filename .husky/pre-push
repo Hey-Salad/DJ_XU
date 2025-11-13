@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Local secret scan before push
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-push] Running gitleaks secret scan..."
+  UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+  if [ $? -eq 0 ] && [ -n "$UPSTREAM" ]; then
+    gitleaks detect --no-banner --redact --log-opts "$UPSTREAM..HEAD"
+  else
+    # Fallback: scan last 50 commits
+    RANGE=$(git rev-parse --short HEAD)~50..HEAD
+    gitleaks detect --no-banner --redact --log-opts "$RANGE"
+  fi
+  if [ $? -ne 0 ]; then
+    echo "\n[SECURITY] Gitleaks found potential secrets in the outgoing range. Aborting push." 1>&2
+    echo "Fix the findings or add proper allow rules before pushing." 1>&2
+    exit 1
+  fi
+else
+  echo "[pre-push] gitleaks not installed; skipping local secret scan."
+  echo "Install: brew install gitleaks (macOS) | choco install gitleaks (Windows) | apt-get install gitleaks (Debian)"
+fi
+
+exit 0

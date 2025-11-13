@@ -31,6 +31,7 @@ interface Env {
   ELEVENLABS_API_BASE?: string;
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_KEY?: string;
+  WATCH_BASE_URL?: string;
 }
 
 const DEFAULT_MODEL = 'deepseek-chat';
@@ -66,6 +67,8 @@ interface BroadcastStartRequest {
   maxViewers?: number;
   captionLanguage?: string;
   enableTranslations?: boolean;
+  watchBaseUrl?: string;
+  title?: string;
 }
 
 interface BroadcastStartResponse {
@@ -258,7 +261,7 @@ async function startBroadcast(
     throw new Error('Supabase configuration is missing');
   }
 
-  const { performanceSessionId, maxViewers = 10, captionLanguage = 'en', enableTranslations = true } = request;
+  const { performanceSessionId, maxViewers = 10, captionLanguage = 'en', enableTranslations = true, watchBaseUrl, title } = request;
 
   const response = await fetch(`${env.SUPABASE_URL}/rest/v1/broadcast_sessions`, {
     method: 'POST',
@@ -274,7 +277,8 @@ async function startBroadcast(
       caption_language: captionLanguage,
       enable_translations: enableTranslations,
       status: 'live',
-      started_at: new Date().toISOString()
+      started_at: new Date().toISOString(),
+      metadata: title ? { title } : undefined,
     })
   });
 
@@ -285,11 +289,14 @@ async function startBroadcast(
 
   const [data] = await response.json();
   const broadcastToken = data.broadcast_token;
+  const base = (watchBaseUrl && watchBaseUrl.length > 0)
+    ? watchBaseUrl
+    : (env.WATCH_BASE_URL ?? 'http://localhost:5173');
 
   return {
     broadcastId: performanceSessionId,
     broadcastToken,
-    shareUrl: `${new URL(env.SUPABASE_URL).origin}/watch/${broadcastToken}`
+    shareUrl: `${base.replace(/\/$/, '')}/watch/${broadcastToken}`
   };
 }
 
@@ -409,16 +416,14 @@ async function getBroadcastStatus(
     throw new Error('Supabase configuration is missing');
   }
 
+  // Query broadcast_sessions directly to avoid dependency on SQL functions
   const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/rpc/get_broadcast_by_token`,
+    `${env.SUPABASE_URL}/rest/v1/broadcast_sessions?broadcast_token=eq.${broadcastToken}&select=id,performance_session_id,is_private,max_viewers,viewer_count,caption_language,enable_translations,status,started_at,metadata&limit=1`,
     {
-      method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'apikey': env.SUPABASE_SERVICE_KEY,
         'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
-      },
-      body: JSON.stringify({ token: broadcastToken })
+      }
     }
   );
 
@@ -426,8 +431,22 @@ async function getBroadcastStatus(
     throw new Error('Failed to get broadcast status');
   }
 
-  const data = await response.json();
-  return data.length ? data[0] : null;
+  const rows = await response.json();
+  if (!rows.length) return null;
+  const bs = rows[0];
+
+  return {
+    broadcast_id: bs.id,
+    performance_session_id: bs.performance_session_id ?? bs.id,
+    is_private: bs.is_private,
+    max_viewers: bs.max_viewers,
+    current_viewer_count: bs.viewer_count,
+    caption_language: bs.caption_language,
+    enable_translations: bs.enable_translations,
+    status: bs.status,
+    started_at: bs.started_at,
+    session_title: bs.metadata?.title ?? null,
+  };
 }
 
 async function broadcastTrack(
