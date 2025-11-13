@@ -43,7 +43,10 @@ const DjXu: React.FC = () => {
   const broadcastService = useMemo(
     () =>
       new BroadcastService({
-        workerEndpoint: import.meta.env.VITE_WORKER_URL || 'http://localhost:8787',
+        workerEndpoint:
+          (import.meta.env as any).VITE_BROADCAST_URL ||
+          (import.meta.env as any).VITE_WORKER_URL ||
+          'http://localhost:8787',
       }),
     []
   );

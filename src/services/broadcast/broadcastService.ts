@@ -10,18 +10,30 @@ import type {
 } from '../../types/broadcast';
 
 export interface BroadcastServiceConfig {
+  // Base URL for broadcast API. Can be either:
+  // - Cloudflare Worker base, expecting /api/broadcast/* routes
+  // - Supabase Functions base (…/functions/v1), expecting /broadcast/* subpaths
   workerEndpoint: string;
 }
 
 export class BroadcastService {
   private readonly workerEndpoint: string;
+  private readonly isSupabaseFunctions: boolean;
 
   constructor(config: BroadcastServiceConfig) {
-    this.workerEndpoint = config.workerEndpoint;
+    this.workerEndpoint = config.workerEndpoint.replace(/\/$/, '');
+    this.isSupabaseFunctions = /\/functions\/v1(\/)?$/.test(this.workerEndpoint) || this.workerEndpoint.includes('.supabase.co/functions/v1');
+  }
+
+  private endpoint(path: string): string {
+    if (this.isSupabaseFunctions) {
+      return `${this.workerEndpoint}/broadcast/${path}`;
+    }
+    return `${this.workerEndpoint}/api/broadcast/${path}`;
   }
 
   async startBroadcast(request: StartBroadcastRequest): Promise<StartBroadcastResponse> {
-    const response = await fetch(`${this.workerEndpoint}/api/broadcast/start`, {
+    const response = await fetch(this.endpoint('start'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +50,7 @@ export class BroadcastService {
   }
 
   async sendCaption(request: SendCaptionRequest): Promise<{ success: boolean; captionId?: number }> {
-    const response = await fetch(`${this.workerEndpoint}/api/broadcast/caption`, {
+    const response = await fetch(this.endpoint('caption'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -55,7 +67,7 @@ export class BroadcastService {
   }
 
   async endBroadcast(broadcastToken: string): Promise<{ success: boolean }> {
-    const response = await fetch(`${this.workerEndpoint}/api/broadcast/end`, {
+    const response = await fetch(this.endpoint('end'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -72,7 +84,7 @@ export class BroadcastService {
   }
 
   async getBroadcastStatus(broadcastToken: string): Promise<BroadcastInfo | null> {
-    const response = await fetch(`${this.workerEndpoint}/api/broadcast/status`, {
+    const response = await fetch(this.endpoint('status'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -102,7 +114,7 @@ export class BroadcastService {
       id?: string;
     }
   ): Promise<{ success: boolean; trackId?: number }> {
-    const response = await fetch(`${this.workerEndpoint}/api/broadcast/track`, {
+    const response = await fetch(this.endpoint('track'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -19,6 +19,8 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_LOCATION: string;
   /** Cloudflare Worker endpoint for DeepSeek proxy */
   readonly VITE_AI_PROXY_URL?: string;
+  /** Broadcast API base: Supabase Functions or Worker */
+  readonly VITE_BROADCAST_URL?: string;
   /** Supabase anonymous URL */
   readonly VITE_SUPABASE_URL?: string;
   /** Supabase anonymous key */

@@ -52,7 +52,11 @@ const reasonMap: Record<string, string> = {
 
 export function useBroadcastAccess(token: string, translationLanguage?: string): UseBroadcastAccessResult {
   const supabase = useMemo(() => getSupabaseClient(), []);
-  const workerUrl = useMemo(() => (import.meta.env.VITE_WORKER_URL ?? 'http://localhost:8787').replace(/\/$/, ''), []);
+  const workerUrl = useMemo(() => {
+    const env = (import.meta as any).env || {};
+    const base = env.VITE_BROADCAST_URL || env.VITE_WORKER_URL || 'http://localhost:8787';
+    return String(base).replace(/\/$/, '');
+  }, []);
   const [status, setStatus] = useState<BroadcastAccessStatus>('idle');
   const [error, setError] = useState<string>();
   const [reason, setReason] = useState<string>();
