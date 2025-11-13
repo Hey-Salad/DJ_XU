@@ -111,3 +111,12 @@ export interface AIResponseHandlerProps {
   isProcessing: boolean;
   currentTrack?: SpotifyTrack | null;
 }
+
+export interface SuggestedTrack {
+  id: string;
+  title: string;
+  artist: string;
+  mood?: string;
+  reason?: string;
+  spotifyQuery?: string;
+}

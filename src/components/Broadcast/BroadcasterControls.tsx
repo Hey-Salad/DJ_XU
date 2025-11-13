@@ -25,6 +25,7 @@ export const BroadcasterControls: React.FC<BroadcasterControlsProps> = ({
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
   const [viewerCount, setViewerCount] = useState<number>(0);
+  const [title, setTitle] = useState<string>('Live Broadcast');
 
   useEffect(() => {
     if (!broadcastData?.broadcastId) {
@@ -66,7 +67,9 @@ export const BroadcasterControls: React.FC<BroadcasterControlsProps> = ({
         performanceSessionId,
         maxViewers: 100,
         captionLanguage: 'en',
-        enableTranslations: true
+        enableTranslations: true,
+        watchBaseUrl: window.location.origin,
+        title,
       });
 
       setBroadcastData(response);
@@ -103,8 +106,16 @@ export const BroadcasterControls: React.FC<BroadcasterControlsProps> = ({
   const handleCopyLink = useCallback(async () => {
     if (!broadcastData) return;
 
+    const computedShareUrl = (() => {
+      try {
+        return new URL(`/watch/${broadcastData.broadcastToken}`, window.location.origin).toString();
+      } catch {
+        return broadcastData.shareUrl;
+      }
+    })();
+
     try {
-      await navigator.clipboard.writeText(broadcastData.shareUrl);
+      await navigator.clipboard.writeText(computedShareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -115,16 +126,24 @@ export const BroadcasterControls: React.FC<BroadcasterControlsProps> = ({
 
   if (!isLive) {
     return (
-      <div className="bg-gray-900 rounded-lg p-4">
+      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-white font-medium text-lg">Live Broadcast</h3>
-            <p className="text-gray-400 text-sm">Share your DJ session with viewers</p>
+            <h3 className="text-slate-900 font-medium text-lg">Live Broadcast</h3>
+            <p className="text-slate-500 text-sm">Share your DJ session with viewers</p>
           </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Broadcast name"
+              className="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900"
+            />
           <button
             onClick={handleStartBroadcast}
             disabled={isLoading}
-            className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2 shadow-lg"
           >
             {isLoading ? (
               <>
@@ -138,9 +157,10 @@ export const BroadcasterControls: React.FC<BroadcasterControlsProps> = ({
               </>
             )}
           </button>
+          </div>
         </div>
         {error && (
-          <div className="mt-3 p-3 bg-red-900/50 border border-red-700 rounded text-red-200 text-sm">
+          <div className="mt-3 p-3 bg-red-100 border border-red-300 rounded text-red-700 text-sm">
             {error}
           </div>
         )}
@@ -149,7 +169,7 @@ export const BroadcasterControls: React.FC<BroadcasterControlsProps> = ({
   }
 
   return (
-    <div className="bg-gray-900 rounded-lg p-4 border-2 border-red-600">
+    <div className="rounded-lg border border-red-600 bg-white p-4 shadow-xl">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
@@ -157,63 +177,75 @@ export const BroadcasterControls: React.FC<BroadcasterControlsProps> = ({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
             </span>
-            <span className="text-white font-bold text-lg">LIVE</span>
+            <span className="text-slate-900 font-bold text-lg">LIVE</span>
           </div>
-          <div className="text-gray-400 text-sm">
+          <div className="text-slate-500 text-sm">
             Broadcast active
           </div>
         </div>
         <button
           onClick={handleEndBroadcast}
           disabled={isLoading}
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white font-medium rounded-lg transition-colors"
+          className="px-4 py-2 bg-slate-900 text-white font-medium rounded-lg transition-colors hover:bg-slate-800 disabled:bg-slate-400"
         >
           {isLoading ? 'Ending...' : 'End Broadcast'}
         </button>
       </div>
 
-      {broadcastData && (
-        <div className="space-y-3">
-          <div className="bg-gray-800 rounded-lg p-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-400 text-sm font-medium">Share Link</span>
-              <button
-                onClick={() => setShowQR(!showQR)}
-                className="text-blue-400 hover:text-blue-300 text-xs font-medium"
-              >
-                {showQR ? 'Hide QR' : 'Show QR'}
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={broadcastData.shareUrl}
-                readOnly
-                className="flex-1 bg-gray-900 text-white px-3 py-2 rounded border border-gray-700 text-sm font-mono"
-              />
-              <button
-                onClick={handleCopyLink}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium text-sm transition-colors"
-              >
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
-          </div>
+          {broadcastData && (
+            <div className="space-y-3">
+              <div className="bg-slate-100 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-gray-400 text-sm font-medium">Share Link</span>
+                  <button
+                    onClick={() => setShowQR(!showQR)}
+                    className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+                  >
+                    {showQR ? 'Hide QR' : 'Show QR'}
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={(function computeShareUrl() {
+                      try {
+                        return new URL(`/watch/${broadcastData.broadcastToken}`, window.location.origin).toString();
+                      } catch {
+                        return broadcastData.shareUrl;
+                      }
+                    })()}
+                    readOnly
+                    className="flex-1 bg-slate-200 text-slate-900 px-3 py-2 rounded border border-slate-300 text-sm font-mono"
+                  />
+                  <button
+                    onClick={handleCopyLink}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium text-sm transition-colors shadow"
+                  >
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+              </div>
 
-          {showQR && (
-            <div className="bg-white p-4 rounded-lg flex justify-center">
-              <QRCodeSVG
-                value={broadcastData.shareUrl}
-                size={200}
-                level="H"
-                includeMargin={true}
-              />
-            </div>
-          )}
+              {showQR && (
+              <div className="bg-slate-50 p-4 rounded-lg flex justify-center">
+            <QRCodeSVG
+              value={(function computeShareUrl() {
+                try {
+                  return new URL(`/watch/${broadcastData.broadcastToken}`, window.location.origin).toString();
+                } catch {
+                  return broadcastData.shareUrl;
+                }
+              })()}
+              size={200}
+              level="H"
+              includeMargin={true}
+            />
+              </div>
+              )}
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-400">Viewers</span>
-            <span className="text-white font-medium">{viewerCount}</span>
+            <span className="text-slate-500">Viewers</span>
+            <span className="text-slate-900 font-medium">{viewerCount}</span>
           </div>
         </div>
       )}

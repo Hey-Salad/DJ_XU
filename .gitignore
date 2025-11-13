@@ -38,6 +38,9 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+# Cloudflare Worker local secrets (never commit)
+cloudflare-worker/.dev.vars
+**/.dev.vars
 
 # Logs
 npm-debug.log*

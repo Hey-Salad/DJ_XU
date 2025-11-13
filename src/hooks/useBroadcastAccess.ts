@@ -52,6 +52,7 @@ const reasonMap: Record<string, string> = {
 
 export function useBroadcastAccess(token: string, translationLanguage?: string): UseBroadcastAccessResult {
   const supabase = useMemo(() => getSupabaseClient(), []);
+  const workerUrl = useMemo(() => (import.meta.env.VITE_WORKER_URL ?? 'http://localhost:8787').replace(/\/$/, ''), []);
   const [status, setStatus] = useState<BroadcastAccessStatus>('idle');
   const [error, setError] = useState<string>();
   const [reason, setReason] = useState<string>();
@@ -110,19 +111,33 @@ export function useBroadcastAccess(token: string, translationLanguage?: string):
       viewer_anon_id: anonId,
     });
 
-    if (rpcError) {
-      setStatus('error');
-      setError('Unable to validate broadcast token.');
-      return;
+    let broadcast = data?.broadcast;
+    const shouldFallback = rpcError || !data || (data && !data.allowed && (data.reason === 'broadcast_not_found' || data.reason === 'broadcast_not_live'));
+    if (shouldFallback) {
+      // Fallback to worker status endpoint (uses service role)
+      try {
+        const resp = await fetch(`${workerUrl}/api/broadcast/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ broadcastToken: token }),
+        });
+        if (resp.ok) {
+          const workerBroadcast = await resp.json();
+          if (workerBroadcast && (workerBroadcast.status === 'live' || workerBroadcast.status === 'paused')) {
+            broadcast = workerBroadcast as unknown as BroadcastAccessSession;
+          }
+        }
+      } catch {
+        // ignore and fall through to error handling
+      }
     }
 
-    if (!data || !data.allowed) {
+    if (!broadcast) {
       setStatus('error');
-      setReason(reasonMap[data?.reason ?? ''] ?? data?.reason);
+      setError(rpcError ? 'Unable to validate broadcast token.' : undefined);
+      setReason(!rpcError && data ? reasonMap[data?.reason ?? ''] ?? data?.reason : undefined);
       return;
     }
-
-    const broadcast = data.broadcast;
 
     if (!broadcast) {
       setStatus('error');
@@ -130,10 +145,17 @@ export function useBroadcastAccess(token: string, translationLanguage?: string):
       return;
     }
 
-    setSession(broadcast);
+    // Normalize shape for viewer components: ensure `id` and `broadcast_token` fields exist
+    const normalized = {
+      ...broadcast,
+      id: (broadcast as any).broadcast_id ?? (broadcast as any).id,
+      broadcast_token: token,
+    } as BroadcastAccessSession;
+
+    setSession(normalized);
 
     const insertPayload = {
-      broadcast_session_id: broadcast.broadcast_id,
+      broadcast_session_id: (normalized as any).broadcast_id ?? normalized.id,
       user_id: userId ?? undefined,
       anonymous_id: userId ? undefined : anonId,
       translation_language: translationLanguage,

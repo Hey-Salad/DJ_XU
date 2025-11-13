@@ -23,6 +23,8 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL?: string;
   /** Supabase anonymous key */
   readonly VITE_SUPABASE_ANON_KEY?: string;
+  /** Public base URL for building share links */
+  readonly VITE_PUBLIC_BASE_URL?: string;
   /** Optional compatibility with Next.js style envs */
   readonly NEXT_PUBLIC_SUPABASE_URL?: string;
   readonly NEXT_PUBLIC_SUPABASE_ANON_KEY?: string;

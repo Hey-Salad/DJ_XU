@@ -108,23 +108,23 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
  }, [isAuthorized, onStateChange]);
 
  if (!isAuthorized) {
-   return (
-     <button 
-       onClick={handleSpotifyConnect}
-       className="w-full bg-black border-2 border-white hover:bg-white hover:text-black text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-all hover:scale-105"
-     >
-       <FontAwesomeIcon icon={faSpotify} className="text-2xl" />
-       <span>{t.connectSpotify}</span>
-     </button>
-   );
- }
+    return (
+      <button
+        onClick={handleSpotifyConnect}
+        className="w-full rounded-lg bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 px-6 py-4 text-white font-bold shadow-lg transition duration-200 hover:opacity-90 hover:-translate-y-0.5 flex items-center justify-center gap-3"
+      >
+        <FontAwesomeIcon icon={faSpotify} className="text-2xl" />
+        <span>{t.connectSpotify}</span>
+      </button>
+    );
+  }
 
- return (
-   <button
-     onClick={onPlaybackToggle}
-     className="w-16 h-16 bg-white hover:bg-gray-100 text-black rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-50"
-     aria-label={isPlaying ? 'Pause' : 'Play'}
-   >
+  return (
+    <button
+      onClick={onPlaybackToggle}
+      className="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-50 shadow-[0_8px_25px_rgba(15,23,42,0.3)]"
+      aria-label={isPlaying ? 'Pause' : 'Play'}
+    >
      {isPlaying ? <Pause size={32} /> : <Play size={32} />}
    </button>
  );

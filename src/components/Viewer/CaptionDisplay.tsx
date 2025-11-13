@@ -74,14 +74,14 @@ export default function CaptionDisplay({
   return (
     <section
       aria-live="polite"
-      className={`w-full ${positionClass} flex flex-col gap-3 text-white`}
+      className={`w-full ${positionClass} flex flex-col gap-3 text-slate-900`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/20 bg-black/70 p-3 text-xs uppercase tracking-wide text-gray-200">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs uppercase tracking-wide text-slate-500 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             type="button"
             className={`rounded-full px-3 py-1 transition-colors ${
-              size === 'small' ? 'bg-white text-black' : 'bg-white/10 text-white'
+              size === 'small' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
             }`}
             onClick={() => setSize('small')}
           >
@@ -90,7 +90,7 @@ export default function CaptionDisplay({
           <button
             type="button"
             className={`rounded-full px-3 py-1 transition-colors ${
-              size === 'medium' ? 'bg-white text-black' : 'bg-white/10 text-white'
+              size === 'medium' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
             }`}
             onClick={() => setSize('medium')}
           >
@@ -99,7 +99,7 @@ export default function CaptionDisplay({
           <button
             type="button"
             className={`rounded-full px-3 py-1 transition-colors ${
-              size === 'large' ? 'bg-white text-black' : 'bg-white/10 text-white'
+              size === 'large' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
             }`}
             onClick={() => setSize('large')}
           >
@@ -111,7 +111,7 @@ export default function CaptionDisplay({
           <button
             type="button"
             className={`rounded-full px-3 py-1 text-[11px] transition-colors ${
-              position === 'bottom' ? 'bg-white text-black' : 'bg-white/10 text-white'
+              position === 'bottom' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
             }`}
             onClick={() => setPosition('bottom')}
           >
@@ -120,7 +120,7 @@ export default function CaptionDisplay({
           <button
             type="button"
             className={`rounded-full px-3 py-1 text-[11px] transition-colors ${
-              position === 'overlay' ? 'bg-white text-black' : 'bg-white/10 text-white'
+              position === 'overlay' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
             }`}
             onClick={() => setPosition('overlay')}
           >
@@ -130,36 +130,36 @@ export default function CaptionDisplay({
       </div>
 
       {sessionStart && (
-        <p className="text-[11px] text-white/60">
+        <p className="text-[11px] text-slate-500">
           Session started at {new Date(sessionStart).toLocaleTimeString()}
         </p>
       )}
 
-      <div
-        ref={containerRef}
-        className={`overflow-y-auto rounded-2xl border border-white/20 bg-black/60 p-4 shadow-lg ${SIZE_CLASSES[size]}`}
-      >
+        <div
+          ref={containerRef}
+          className={`overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-lg ${SIZE_CLASSES[size]}`}
+        >
         {renderedCaptions.length === 0 && (
-          <p className="text-sm text-white/60">Waiting for live captions...</p>
+          <p className="text-sm text-slate-500">Waiting for live captions...</p>
         )}
         {renderedCaptions.map((caption) => (
           <article
             key={caption.id}
-            className="caption-entry mb-3 flex flex-col gap-1 rounded-lg bg-white/5 p-3 transition-shadow hover:bg-white/10"
+            className="caption-entry mb-3 flex flex-col gap-1 rounded-lg bg-slate-50 p-3 transition-shadow hover:bg-slate-100"
             aria-label={`${captionSpeakerLabel(caption.speaker)}: ${caption.original_text}`}
           >
             <div className="flex items-center justify-between text-xs uppercase tracking-wider text-gray-400">
               <span>{captionSpeakerLabel(caption.speaker)}</span>
               <span>{formatRelativeTime(caption.timestamp_ms)}</span>
             </div>
-            <p className="text-current leading-relaxed">{caption.original_text}</p>
-            <div className="flex items-center justify-between text-[10px] text-gray-400">
+            <p className="text-slate-900 leading-relaxed">{caption.original_text}</p>
+            <div className="flex items-center justify-between text-[10px] text-slate-500">
               <span>
                 Confidence: {Math.round((caption.confidence ?? 0) * 100)}%
               </span>
             </div>
             {translationLanguage && (
-              <div className="mt-2 rounded-md border border-dashed border-white/30 bg-white/5 p-2 text-[11px] text-white/80">
+            <div className="mt-2 rounded-md border border-dashed border-slate-300 bg-slate-50 p-2 text-[11px] text-slate-600">
                 Translation overlay ready ({translationLanguage.toUpperCase()})
               </div>
             )}
@@ -168,7 +168,7 @@ export default function CaptionDisplay({
       </div>
 
       {translationHint && (
-        <p className="text-[11px] text-blue-200">{translationHint}</p>
+        <p className="text-[11px] text-slate-400">{translationHint}</p>
       )}
     </section>
   );

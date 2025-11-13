@@ -19,10 +19,10 @@ class BroadcastErrorBoundary extends React.Component<PropsWithChildren<unknown>,
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-black px-4 text-white">
-          <div className="rounded-2xl border border-white/20 bg-white/5 p-6 text-center">
+        <div className="flex min-h-screen items-center justify-center bg-white px-4 text-slate-900">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center shadow-lg">
             <p className="text-xl font-semibold">Something went wrong</p>
-            <p className="text-sm text-white/60">
+            <p className="text-sm text-slate-500">
               We ran into an issue displaying the broadcast. Please refresh the page.
             </p>
           </div>
@@ -55,8 +55,8 @@ export default function WatchBroadcast(): JSX.Element {
 
   if (access.status === 'loading' || access.status === 'idle') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
-        <div className="animate-pulse rounded-2xl border border-white/20 bg-white/5 px-6 py-4 text-center">
+      <div className="flex min-h-screen items-center justify-center bg-white text-slate-900">
+        <div className="animate-pulse rounded-2xl border border-slate-200 bg-slate-50 px-6 py-4 text-center text-slate-600">
           Connecting to DJ Xu broadcast…
         </div>
       </div>
@@ -65,13 +65,13 @@ export default function WatchBroadcast(): JSX.Element {
 
   if (access.status === 'error' || !access.session) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-black px-4 text-white">
-        <div className="rounded-2xl border border-white/20 bg-white/5 px-6 py-5 text-center">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-4 text-slate-900">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-5 text-center shadow-lg">
           <p className="text-lg font-semibold">Broadcast unavailable</p>
-          <p className="text-sm text-white/60">{errorCopy}</p>
+          <p className="text-sm text-slate-500">{errorCopy}</p>
           <button
             type="button"
-            className="mt-4 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold transition hover:border-white"
+            className="mt-4 rounded-full border border-slate-400 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-600"
             onClick={() => {
               access.refresh();
             }}

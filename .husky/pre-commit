@@ -6,3 +6,13 @@ npm run type-check
 
 # Run linting and formatting
 npm run lint-staged
+
+# Block committing local secret files
+if git diff --cached --name-only | grep -qE '(^|/)\.dev\.vars$'; then
+  echo "\n[SECURITY] .dev.vars is staged. Remove it from the commit (git rm --cached <path>) and use .dev.vars.example instead." 1>&2
+  exit 1
+fi
+if git diff --cached --name-only | grep -qE '(^|/)(\.env(\..*)?|\.env)$'; then
+  echo "\n[SECURITY] One or more .env files are staged. Remove them from the commit and use example files instead." 1>&2
+  exit 1
+fi
