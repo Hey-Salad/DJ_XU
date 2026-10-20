@@ -13,7 +13,11 @@ if [ ! -d "dist" ]; then
 fi
 
 # Deploy to Pages
-export CLOUDFLARE_API_TOKEN=6vr0nZ_kwtwEH1ARbZL3J0sPVIx6UywGzD2kY30b
+# CLOUDFLARE_API_TOKEN comes from the environment (see DEPLOYMENT_GUIDE.md); never put it in this file.
+if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+    echo "❌ CLOUDFLARE_API_TOKEN is not set. export it from your secret store first."
+    exit 1
+fi
 npx wrangler@latest pages deploy dist --project-name=dj-xu --branch=production
 
 echo ""

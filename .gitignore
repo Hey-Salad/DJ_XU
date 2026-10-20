@@ -62,3 +62,15 @@ coverage/
 
 # Firebase
 .firebase/
+.env.*
+!.env.example
+*.key
+*.p12
+*.pem
+google-credentials.json
+*service-account*.json
+*credentials*.json
+*credentials*.json.backup
+.npmrc
+venv/
+.venv/
