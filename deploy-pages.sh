@@ -13,7 +13,7 @@ if [ ! -d "dist" ]; then
 fi
 
 # Deploy to Pages
-export CLOUDFLARE_API_TOKEN=6vr0nZ_kwtwEH1ARbZL3J0sPVIx6UywGzD2kY30b
+export CLOUDFLARE_API_TOKEN=<redacted cloudflare-api-key …Y30b>
 npx wrangler@latest pages deploy dist --project-name=dj-xu --branch=production
 
 echo ""
